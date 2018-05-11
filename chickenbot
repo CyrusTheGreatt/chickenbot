@@ -1,0 +1,490 @@
+const Discord = require("discord.js");
+const Jimp =- require("jimp")
+const YIDL = require("ytdl-core")
+
+const token = "NDM0NzAzNzY3ODU4OTcwNjI0.DbOTNw.PHvd0yCZMbhHX0lZXidrdOPyUls"; 
+var PREFIX = "c!"
+
+function generateHex() {
+    return "#" + Math.floor(Math.random() * 16777215).toString(16);
+}
+
+function play(connection, message) {
+    var server = servers[message.guild.id];
+
+    server.dispatcher = connection.playStream(YIDL(server.queue[0], {filter: "audioonly"}));
+
+    server.queue.shift();
+
+    server.dispatcher.on("end", function() {
+        if (server.queue[0]) play(connection, message);
+        else connection.disconnect();
+    });
+}
+
+var slots = [
+    ":b:",
+    ":chicken:",
+    ":apple:",
+    ":pineapple:",
+    ":shit:",
+    ":egg:",
+    ":soccer:",
+    ":ok_hand:",
+    ":droplet:",
+]
+
+var fortunes = [
+    "Yes",
+    "no",
+    "I'll think about it....",
+    "idk",
+    "I think not",
+    "How could I know?",
+    "Well, possibly",
+    "I think that would be a very good idea",
+    //"I think that would be a very good idea, but why would you listen to a bot?",
+    "I have no idea",
+    "Absolutely yes! Thats a very good idea",
+    "No lmao.... that makes no sense",
+    "I think you should, but thats just my opinion",
+    //"I'm a bot dont ask me life depending questions",
+    "You know, no",
+    "Nothing personal, but i dont think you are able to do that",
+    "Please no",
+    "Hell no",
+    "Hell yes",
+    "Why would you even ask that?"
+];
+
+var insulted = "if you see this, something went wrong"
+
+var dice = [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+];
+
+var bot = new Discord.Client();
+
+var servers = {};
+
+//bot.on("guildMemberAdd", function(member) {
+    //member.guild.channels.find("name", "general").send("Welcome to this server " + member.toString());
+//});
+
+bot.on('ready', () => {
+    bot.user.setActivity("Chicken bot is being developed and can be unstable. For help type " + PREFIX + "help")
+  });
+
+bot.on("ready", function() {
+    console.log("Chicken Bot is ready to go!")  
+});
+
+bot.on("message", function(message) {
+    if (message.author.equals(bot.user)) return;
+
+    if (!message.content.startsWith(PREFIX)) return;
+
+    var args = message.content.substring(PREFIX.length).split(" ");
+
+    switch (args[0].toLowerCase()) {
+        //case "prefix":
+            //if (args[1]) var PREFIX = (args[1])
+            //else message.channel.send("Please say what prefix you want.")
+            //break;
+        //case "checkprefix":
+            //message.channel.send("prefix = " + PREFIX)
+            //break;
+        //case "greetmsgenable":
+            
+        case "invitebot": // invite the bot command
+            message.channel.send("Invite link to have me in your server! - https://discordapp.com/api/oauth2/authorize?client_id=434703767858970624&permissions=8192&scope=bot");
+			break;
+		case "botinfo":
+            var embed = new Discord.RichEmbed()
+                .setColor('RED')
+                .setTitle('Bot Info')
+                .addField("Creator:", "Proud dutch chicken#6140")
+                .addField("Servers:", bot.guilds.size)
+                .addField("Help command:", PREFIX + "help")
+                //.setFooter("Version", "Beta")
+            message.channel.send(embed);
+            break;
+        case "ping":
+            message.channel.send("Ping: " + bot.ping + "ms");
+            break;
+        case "shouldi":
+            if (args[1]) message.channel.send(fortunes[Math.floor(Math.random() * fortunes.length)]);
+            else message.channel.send("You should what?")
+            break;
+        case "shouldyou":
+            if (args[1]) message.channel.send(fortunes[Math.floor(Math.random() * fortunes.length)]);
+            else message.channel.send("He should what?")
+            break;
+        case "shouldhe":
+            if (args[1]) message.channel.send(fortunes[Math.floor(Math.random() * fortunes.length)]);
+            else message.channel.send("He should what?")
+            break;
+        case "should":
+            if (args[1]) message.channel.send(fortunes[Math.floor(Math.random() * fortunes.length)]);
+            else message.channel.send("Should what?")
+            break;
+        case "help":
+            message.channel.send("List of commands sliding into your dm's.")
+            var embed = new Discord.RichEmbed()
+                .setColor("BLUE")
+                .setTitle("Welcome in the help menu")
+                .setDescription("Ofcourse the commands need to be placed after your prefix(" + PREFIX + ").")
+                .addField("Shouldi", "Here you can ask chicken bot if you should do something(EG: *Person*: " + PREFIX + "shouldi eat something? *Chicken bot*: Yes) this also works with shouldhe, shouldyou or should")
+                .addField("say", "Use this command to make chicken bot say something.")
+                .addField("sayd", "Use this command to make chicken bot say something and delete your message.")
+                .addField("embedsay", "Use this command to make chicken bot say something in an embed.")
+                .addField("embedsayd", "Use this command to make chicken bot say something in an embed and delete your message.")
+                .addField("serverinfo", "Use this command to see information about the server you're in.")
+                .addField("me", "Use this command to get a little information about yourself.")
+                .addField("insult", "Use this command to insult someone, chickenbot is not responsible for anything happening after this command.")
+                .addField("bug", "Use this command to give feedback to chickenbot.")
+                .addField("dice", "Use this command to get a random number between 1 and 6, like a dice. You can also make it choose between things you want it to, by putting the things behind " + PREFIX + "dice")
+                .addField("invite bot", "Use this command to get an invite link so you can put me into your server.")
+                .addField("coming", "Use this command to get a list of things I'm planning to make.")
+            message.author.send(embed);
+            break;
+        case "say":
+            if (args[1]) message.channel.send(message.content.slice((PREFIX + "say").length));
+            else message.channel.send("How about saying something?")
+            break;
+        case "sayd":
+            if (args[1]) {
+            message.channel.send(message.content.slice((PREFIX + "sayd").length));
+            message.delete()}
+            else message.channel.send("How about saying something?")
+            break;
+        case "embedsay":
+            var embed = new Discord.RichEmbed()
+                .setColor("RED")
+                .setDescription(message.content.slice((PREFIX + "embedsay").length))
+            if (args[1]) message.channel.send(embed);
+            else message.channel.send("What would you like to say?")
+            break;
+        case "embedsayd":
+            var embed = new Discord.RichEmbed()
+                .setColor("RED")
+                .setDescription(message.content.slice((PREFIX + "embedsayd").length))
+            if (args[1]) {
+            message.channel.send(embed);
+            message.delete()
+            }
+            else message.channel.send("What would you like to say?")
+            break;
+        case "coming":
+            var embed = new Discord.RichEmbed()
+                .setColor("BLUE")
+                .setTitle("List of things im planning to put into chicken bot:")
+                .addField("support", "- make a way to let users of chicken bot report bugs and spelling errors. Right now you can report errors on pm on discord: Proud dutch chicken#6140")
+                .addField("Memes", "- make a few memes..... prepare yourself.")
+            message.channel.send(embed);
+            break;
+        case "serverinfo":
+            if (message.guild.verificationLevel == 0) {
+                var level = "none"
+            }
+            if (message.guild.verificationLevel == 1) {
+                    var level = "low"
+            }
+            if (message.guild.verificationLevel == 2) {
+                var level = "medium"
+            }
+            if (message.guild.verificationLevel == 3) {
+                var level = "(╯°□°）╯︵ ┻━┻"
+            }
+            if (message.guild.verificationLevel == 4) {
+                var level = " ┻━┻彡 ヽ(ಠ益ಠ)ノ彡┻━┻"
+            }
+            
+            if (message.guild.explicitContentFilter == 0) {
+                var exlevel = "Don't scan any messages."
+            }
+            if (message.guild.explicitContentFilter == 1) {
+                    var exlevel = "Scan messages from members without a role."
+            }
+            if (message.guild.explicitContentFilter == 2) {
+                var exlevel = "Scan messages sent by all members."
+            }
+            
+            var embed = new Discord.RichEmbed()
+                .setColor("RED")
+                .addField("Servername:", message.guild.name)
+                .addField("Membercount:", message.guild.memberCount)
+                .addField("Owner:", message.guild.owner)
+                .addField("Region:", message.guild.region)
+                .addField("Verificationlevel:", message.guild.verificationLevel + ", " + level)
+                .addField("Explicit Content Filter:", message.guild.explicitContentFilter + ", " + exlevel)
+            message.channel.send(embed);
+            break;
+        case "me":
+        var meper = args[1]
+        if (message.member.nickname) {
+            var nname = message.member.nickname
+        } else var nname = "no nickname"
+            var embed = new Discord.RichEmbed()
+                .setColor("RED")
+                .addField("Username:", nname)
+                //.addField("Last message:", message.member.lastMessage)
+                .addField("Tag:", message.author.tag)
+                .addField("Highest role:", message.member.highestRole)
+                .addField("Id:", message.member.id)
+                .addField("Joined the server at:", message.member.joinedAt)
+                
+            message.channel.send(embed);
+            break;
+        //case "ban":
+            //if (message.author.HasPermission)
+            //break;
+        case "dice":
+            if (!args[1]) message.channel.send(dice[Math.floor(Math.random() * dice.length)]);
+            else {
+                if (!args[2]) message.channel.send("Maybe give more than two values?")
+                else {
+                    if (!args[3]) {
+                        var random = [
+                            (args[1]),
+                            (args[2]),
+                        ];
+                        message.channel.send(random[Math.floor(Math.random() * random.length)]);
+                    }
+                    else {
+                        if (!args[4]) {
+                            var random = [
+                                (args[1]),
+                                (args[2]),
+                                (args[3]),
+                            ];
+                            message.channel.send(random[Math.floor(Math.random() * random.length)]);
+                        }
+                        else {
+                            if (!args[5]) {
+                                var random = [
+                                    (args[1]),
+                                    (args[2]),
+                                    (args[3]),
+                                    (args[4]),
+                                ];
+                                message.channel.send(random[Math.floor(Math.random() * random.length)]);
+                            }
+                            else {
+                                if (!args[6]) {
+                                    var random = [
+                                        (args[1]),
+                                        (args[2]),
+                                        (args[3]),
+                                        (args[4]),
+                                        (args[5]),
+                                    ];
+                                    message.channel.send(random[Math.floor(Math.random() * random.length)]);
+                                }
+                                else {
+                                    if (!args[7]) {
+                                        var random = [
+                                            (args[1]),
+                                            (args[2]),
+                                            (args[3]),
+                                            (args[4]),
+                                            (args[5]),
+                                            (args[6]),
+                                        ];
+                                        message.channel.send(random[Math.floor(Math.random() * random.length)]); 
+                                    }
+                                    else {
+                                        message.channel.send("Sorry, but like a real dice you can only add 6 custom values.")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            break;
+        case "bug":
+            if (args[1]) {
+                console.log(message.author + ": " + message.content.slice((PREFIX + "bug").length));
+                var embed = new Discord.RichEmbed()
+                    .setColor("RED")
+                    .setDescription("Thanks for sending us feedback! :smile:")
+                message.channel.send(embed);
+            } else {
+                var embed = new Discord.RichEmbed()
+                    .setColor("RED")
+                    .setDescription("Maybe you could report the bug?")
+                message.channel.send(embed);
+            }
+            
+            break;
+        case "insult":
+            if ((args[1])) {
+                if ((args[1]) == "intense") {
+                    var insulted = message.content.slice((PREFIX + "insult intense").length);
+                
+                    var insults = [
+                        "Stop living " + insulted + ".",
+                        insulted + " you're just a failed abortion."
+                    ];
+                    //message.channel.send("Chicken bot is not responsible for if you start feeling sad.")
+                } else {
+            
+                var insulted = message.content.slice((PREFIX + "insult").length);
+                
+                var insults = [
+                    insulted + " sucks.",
+                    insulted + " looks like shit.",
+                    "You're a failure " + insulted + ".",
+                    "What's the differenence between " + insulted + " and a bucket filled with shit? The bucket!",
+                    insulted + " ur mom gay lol.",
+                    "Damn " + insulted + " you suck."
+
+                ];
+                }
+            if (message.content.includes("chicken bot")) {
+                message.channel.send(message.author.tag + " sucks")
+            } else
+            //if (insulted = message.guild.owner) {
+                //message.channel.send("Damn" + message.guild.owner + ", what an ugly server.")
+            //} else
+                message.channel.send(insults[Math.floor(Math.random() * insults.length)]);
+                //message.channel.send(insulted + " sucks.")
+            } else message.channel.send("who would you like to insult?")
+            break;
+        case "status":
+            if (bot.uptime < 300000) {
+                var embed = new Discord.RichEmbed()
+                    .setColor("#FFFF00")
+                    .setDescription("Chicken bot is under construction or just started up, this means the bot can be unstabe.")
+                message.channel.send(embed);
+                //message.channel.send("Chicken bot is under construction, or has just started up, the bot can be a little unstable.")
+            } else {
+                var embed = new Discord.RichEmbed()
+                    .setColor("GREEN")
+                    .setDescription("Chicken bot is online! on " + bot.ping)
+                message.channel.send(embed);
+                //message.channel.send("chickenbot = online")
+            }
+            break;
+        case "start":
+            var money = 10
+            break;
+        case "channelinfo":
+            message.channel.send(message.channel.name)
+            message.channel.send(message.channel.type)
+            message.channel.send(message.channel.position + 1)
+            break;
+        case "on":
+            if (message.author.id == "358975513852772364") {
+            bot.user.setActivity("with chickens. " + PREFIX + "help")
+            message.channel.send("Chicken bot is online.")
+            } else message.channel.send("just no.")
+            break;
+        case "slots":
+            var slot1 = (slots[Math.floor(Math.random() * slots.length)])
+            var slot2 = (slots[Math.floor(Math.random() * slots.length)])
+            var slot3 = (slots[Math.floor(Math.random() * slots.length)])
+            message.channel.send((slots[Math.floor(Math.random() * slots.length)]) + " | " + (slots[Math.floor(Math.random() * slots.length)]) + " | " + (slots[Math.floor(Math.random() * slots.length)])).then ;message.channel.send(slot1 + " | " + slot2 + " | " + slot3).then ;message.channel.send((slots[Math.floor(Math.random() * slots.length)]) + " | " + (slots[Math.floor(Math.random() * slots.length)]) + " | " + (slots[Math.floor(Math.random() * slots.length)]));
+            
+            var winembed = new Discord.RichEmbed()
+                .setColor("GREEN")
+                .setTitle("You won.")
+                .setDescription("Congratulations!")
+
+            var loseembed = new Discord.RichEmbed()
+                .setColor("RED")
+                .setTitle("Sadly, you lost.")
+                .setDescription("But you can always try again.")
+
+            if (slot1 == slot2) {
+                if (slot1 = ":chicken:")
+                message.channel.send(winembed)
+            } else {
+                if (slot2 == slot3) {
+                    message.channel.send(winembed)
+                } else message.channel.send(loseembed)
+            }
+            break;
+        case "nicktest":
+            message.channel.send("tested")
+            message.member.setNickname("Its ja boy ")
+            break;
+        //case "memes":
+            //wil make a menu from the memes here.
+        //case "meme":
+            //message.channel.send({files: "C:\Users\Sam\Desktop\bot\angry dog.png"})
+            //reak;
+        //case "flip":
+            //image.flip(horz)
+            //break;
+        //case "servers":
+           // message.channel.send(bot.)
+            //break;
+        //case "play":
+            //if (!args[1]) {
+                //message.channel.send("Please provide a link.")
+                //return;
+            //}
+
+            //if (!message.member.voiceChannel) {
+               // message.channel.send("You must be in a voice channel.");
+            //}
+            
+            //if(!servers[message.guild.id]) servers[message.guild.id] = {
+                //queue: []
+            //};
+
+            //var server = servers[message.guild.id];
+
+            //server.queue.push(args[1])
+
+            //if (!message.guild.voiceConnection) message.member.voiceChannel.join().then(function(connection){
+                //play(connection, message)
+            //});
+            //break;
+        //case "skip":
+            //var server = servers[message.guild.id];
+
+            //if (server.dispatcher) server.dispatcher.end();
+            //break;
+        //case "stop":
+            //var server = servers[message.guild.id];
+
+            //if (message.guild.voiceConnection) message.guild.voiceConnection.disconnect();
+            //break;
+        default:
+            message.channel.send("Invalid command, try " + PREFIX +"help")
+    }
+});
+
+bot.on("message", function(message) {
+    if (message.content == "hello")
+        message.react("🖐")
+
+    if (message.content == "hey") 
+        message.react("🖐")
+    
+    if (message.content.includes("trap")) 
+         message.react("🏳️‍🌈")
+    
+    //if (message.content.startsWith("poll")) 
+        //message.react("✅")
+        //message.react("❌")
+
+    //if (message.content.includes("like hardwell")) 
+        //message.channel.send("You're a faggot")
+    
+    if (message.content == "no u")
+        message.channel.send("no u back")
+    
+    if (message.conten == "ur mom gay")
+        message.channel.send("no u")
+});
+
+bot.login(token);
